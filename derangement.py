@@ -4,7 +4,9 @@ from math import floor, e
 from io import StringIO
 
 
-# Derangement code golf: see `derangement` definition
+# Derangement code golf: see `derangement` definition.
+# `(n-1)*-1` Is the base case, converting 0 to 1 and 1 to 0.
+#    This was used as elif cannot be used and double lambda is lame.
 d = lambda n: (n-1)*-1 if n in [0,1] else n*(d(n-1)) + (-1)**n
 
 
