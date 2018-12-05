@@ -15,17 +15,26 @@ def parse_claim(claim):
         'height': int(height.strip()),
     }
 
-def get_fabric_overlap(file_name):
+def get_fabric_overlap(file_name: str) -> int:
+    '''
+    Return square pixel area of overlapping fabric
+    '''
     fabric = np.zeros((1000, 1000))
     with open(file_name) as f:
         for line in f.readlines():
             claim = parse_claim(line)
-        fabric[:claim['top_offset'], claim['top_offset'] + claim['height']] = 1.0
-        fabric[:claim['left_offset'], claim['left_offset'] + claim['width']] =  1.0
 
-    return np.count_nonzero(fabric)
+            top_offset = claim['top_offset']
+            left_offset = claim['left_offset']
 
+            height = min(top_offset + claim['height'], 999)
+            width = min(top_offset + claim['width'], 999)
 
+            # this indexing is wrong
+            fabric[:claim['top_offset'], height] += 1.0
+            fabric[claim['left_offset'], width:] +=  1.0
+
+    return np.count_nonzero(fabric > 1)
 
 if __name__ == '__main__':
     print(get_fabric_overlap('day_3_input_part_1.txt'))
