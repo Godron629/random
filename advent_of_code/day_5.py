@@ -1,6 +1,8 @@
 import string
 from copy import deepcopy
 
+from util import read_input
+
 def p1(file_name):
     with open(file_name) as f:
         heap = []
@@ -8,66 +10,35 @@ def p1(file_name):
             c = f.read(1)
             if c == '\n':
                 break
-
-            is_upper = c.isupper()
-
-            opp_polar = c.upper() if c.islower() else c.lower()
-
-            if not heap:
-                heap.append(c)
-            elif heap[-1] == opp_polar:
-                heap.pop()
-            else:
-                heap.append(c)
+            add_to_heap(c, heap)
     print(len(heap))
 
+def add_to_heap(c, heap):
+    opp_polar = c.upper() if c.islower() else c.lower()
+    if not heap:
+        heap.append(c)
+    elif heap[-1] == opp_polar:
+        heap.pop()
+    else:
+        heap.append(c)
 
 def p2(file_name):
-    all_lower = string.ascii_lowercase
-    all_upper = string.ascii_uppercase
 
-    upper_then_lower = all_upper + all_lower
-    lower_then_upper = all_lower + all_upper
+    count_by_letter = {}
+    data = read_input(file_name)
 
-    count_by_letter_combo = {}
-    for a, b in zip(upper_then_lower, lower_then_upper):
-        with open(file_name) as f:
-            heap = []
-            while True:
-                c = f.read(1)
-                if c == '\n':
-                    break
-
-                is_upper = c.isupper()
-
-                opp_polar = c.upper() if c.islower() else c.lower()
-
-                if not heap:
-                    heap.append(c)
-                elif heap[-1] == opp_polar:
-                    heap.pop()
-                else:
-                    heap.append(c)
-
-        heap_copy = deepcopy(heap)
-
+    for a in string.ascii_lowercase:
         heap = []
-        for c in heap_copy:
-
-            is_upper = c.isupper()
-
-            opp_polar = c.upper() if c.islower() else c.lower()
-
-            if not heap:
-                heap.append(c)
-            elif heap[-1] == opp_polar:
-                heap.pop()
-            else:
+        for c in data[0]:
+            if c.lower() != a:
                 heap.append(c)
 
-        count_by_letter_combo[(a, b)] = len(heap)
+        new_heap = []
+        for c in heap:
+            add_to_heap(c, new_heap)
+        count_by_letter[a] = len(new_heap)
 
-    return min(count_by_letter_combo.items(), key=lambda x: x[1])
+    return min(count_by_letter.items(), key=lambda x: x[1])
 
 
 if __name__ == '__main__':
