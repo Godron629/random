@@ -1,7 +1,7 @@
 #lang racket
 
-(define tree '(1 (2 (4 () ()) (5 () ())) (15 () ()) (16 () ())))
-;(define tree '(1 (2 (4))))
+;(define tree '(1 (2 (4 () ()) (5 () ())) (15 () ()) (16 () ())))
+(define tree '(1 (2 (4))))
   
 ;; Function height
 ;; Return the height of a tree represented as a list.
@@ -129,58 +129,21 @@
        (grouped-labelled-tree (group-by-two flat-labelled-tree)))
     (firsts-if-seconds-match grouped-labelled-tree level)))
 
-(define (max-of-seconds ls)
-  (cond
-    ((null? ls) 0)
-    (else (max
-           (cadar ls)
-           (max-of-seconds (cdr ls))))))
-
-(define (seconds-increasing ls)
-  (define (helper ls previous)
+(define (sum? ls value)
+  (define (helper tree test sum)
     (cond
-      ((null? ls) #t)
-      ((equal? (+ 1 previous) (cadar ls))
-       (helper (cdr ls) (add1 previous)))
-      (else #f)))
-  (helper ls 0))
+      ((null? tree) (equal? test sum))
+      ((is-leaf-node? tree)
+       (equal? test sum))
+      ((null? (cdr tree))
+       ; no right siblings - go down a level
+       (helper (car tree) test (+ sum (car (flatten tree)))))
+      (else (append
+             ; recurse right siblings and children
+             (helper (car tree) test (+ sum (car (flatten tree))))
+             (helper (cdr tree) test sum)))))
+  (trace helper)
+  (helper ls value 0))
 
-(define (seconds-increasing2 ls)
-  (define (helper ls previous)
-    (cond
-      ((null? ls) '())
-      ((not (equal? (+ 1 previous) (cadar ls)))
-       #f)
-      ((null? (cdr ls)) ls)
-      (else
-       (if (equal? (+ 2 previous) (cadadr ls))
-           (cons (car ls) (helper (cdr ls) (add1 previous)))
-           '()))))
-  (helper ls 0))
+(sum? tree 10)
 
-
-;(seconds-increasing2 (car thing))
-
-(define (return-increasing-perm ls)
-  (cond
-    ((null? ls) '())
-    ((not (seconds-increasing2 (car ls))) (return-increasing-perm (cdr ls)))
-    (else (cons (seconds-increasing2 (car ls)) (return-increasing-perm (cdr ls))))))
-
-(define (sum-of-firsts ls)
-  (cond
-    ((null? ls) 0)
-    (else (+ (caar ls) (sum-of-firsts (cdr ls))))))
-
-(define (sum-of-sublist-firsts ls)
-  (cond
-    ((null? ls) '())
-    (else (cons (sum-of-firsts (car ls)) (sum-of-sublist-firsts (cdr ls))))))
-
-(remove-duplicates (sum-of-sublist-firsts (return-increasing-perm (permutations (group-by-two (label-tree-levels tree))))))
-
-
-;(define (sum? tree value)
-
-
-  
