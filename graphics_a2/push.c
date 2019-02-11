@@ -244,6 +244,8 @@ int main(int argc, char **argv) {
    MyInit(WINDOW_WIDTH, WINDOW_HEIGHT);
 
    printf("\n%s\n\n", PROGRAM_TITLE);
+   printf("Press RB to change lookAt\n");
+   printf("Press z to push cube\n");
 
    glutMainLoop(); 
    return 1; 

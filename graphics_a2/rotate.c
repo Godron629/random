@@ -239,6 +239,7 @@ int main(int argc, char **argv) {
    // Now take in command line arguments
    if (argc != 10) {
       printf("Not enough parameters passed\n");
+      printf("Need p1 xyz, p2 xyz, and cube center xyz\n");
       return 0; 
    }
    
@@ -266,9 +267,7 @@ int main(int argc, char **argv) {
 
    // Print out a bit of help dialog.
    printf("\n%s\n\n", PROGRAM_TITLE);
-   printf("Print out some helpful information here.\n");
-   printf("When you program, you can also use\n");
-   printf("printf to do debugging.\n\n");
+   printf("Press RB to rotate cube\n");
 
    glutMainLoop(); 
    return 1; 
