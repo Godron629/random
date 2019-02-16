@@ -1,5 +1,11 @@
+"""
+Gideon Richter
+001181085
+CPSC 4110: Algorithms Project Assignment 2
+"""
 import os
 import pickle
+from datetime import datetime
 
 import geopy
 import networkx as nx
@@ -307,10 +313,12 @@ if __name__ == '__main__':
     
     p = 2
 
+    before = datetime.utcnow()
     median_result_costs, median_result_nodes = \
         p_median(p, city_graph, shortest_path_pickle=shortest_path_file)    
+    print('median time: {}'.format(datetime.utcnow() - before))
     
+    before = datetime.utcnow()
     center_result_costs, center_result_nodes = \
         p_center(p, city_graph, shortest_path_pickle=shortest_path_file)            
-    
-    i = 5
+    print('center time: {}'.format(datetime.utcnow() - before))
