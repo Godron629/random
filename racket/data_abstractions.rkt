@@ -112,11 +112,89 @@
   ;; adding any more parameters to the function `index`.
   (index-helper item ls 0))
 
+(define (make-list count item)
+  ;; make a list of item repeated `count` times
+  (cond
+    ((zero? count) '())
+    (else
+     (cons item (make-list (sub1 count) item)))))
 
+(define (all-same? ls)
+  ;; assert that every element of a list
+  ;; is the same.
+  (cond
+    ((or (null? ls) (null (cdr ls))) #t)
+    ((equal? (car ls) (cdr ls)))
+    (else #f)))
 
+(define (count-background item ls)
+  ;; return a count of the number
+  ;; of elements in `ls` not equal
+  ;; to `item`.
+  (cond
+    ((null? ls) 0)
+    ((equal? item (car ls))
+     (count-background item (cdr ls)))
+    (else (add1 (count-background item (cdr ls))))))
 
+(define (list-front ls n)
+  ;; return the first n elements of ls
+  (define (list-front-helper ls n)
+    (cond
+      ((or (null? ls) (zero? n)) '())
+      (else
+       (cons (car ls) (list-front (cdr ls) (sub1 n))))))
+  (if (>= n (length ls))
+      (error "length of " ls "is less than " n)
+      (list-front-helper ls n)))
 
+(define (wrapa item n)
+  ;; wrap item in n brackets
+  (cond
+    ((zero? n) item) ; return the item 
+    (else
+     (cons (wrapa item (sub1 n)) '()))))
 
+(define (multiple? m n)
+  ;; assert that n is a multiple of m
+  (cond
+    ((zero? n) 0)
+    (else (zero? (remainder m n)))))
+
+(define (even? n)
+  ;; assert that a number n is even
+  (cond
+    ((zero? n) #t)
+    (else (odd? (sub1 n)))))
+
+(define (odd? n)
+  ;; assert that a number n is odd
+  (cond
+    ((zero? n) #f)
+    (else (even? (sub1 n)))))
+
+(define (sum-of-odds ls n)
+  ;; return the sum of the first n odd integers
+  (cond
+    ((or (null? ls) (zero? n)) 0)
+    ((odd? (car ls))
+     (+ (car ls) (sum-of-odds (cdr ls) (sub1 n))))
+    (else (sum-of-odds (cdr ls) n))))
+
+(require racket/trace)
+(define (n-tuple->integer ntpl)
+  ;; convert an n tuple to its integer equivalent
+  ;; i.e. (1 2 3) -> 123
+  (define (helper ntpl n)
+    (cond
+      ((null? ntpl) 0)
+      ((zero? n) (car ntpl))
+      (else (+ (* (expt 10 n) (car ntpl))
+               (helper (cdr ntpl) (sub1 n))))))
+  (trace helper)
+  ;; form an integer as the sum of the
+  ;; list values multiplied by their place value.
+  (helper ntpl (sub1 (length ntpl))))
 
 
 
