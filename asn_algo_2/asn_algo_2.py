@@ -6,29 +6,20 @@ import networkx as nx
 from networkx.exception import NetworkXNoPath
 import osmnx as ox
 
+LETHBRIDGE = 'City of Lethbridge, Alberta'
+LETHBRIDGE_GRAPH = 'lethbridge_graph_drive.graphml'
+LETHBRIDGE_SHORTEST_PATH = 'lethbridge_shortest_path.pickle'
 
-GRAPH_FILE = 'lethbridge_graph_all.graphml'
+COCHRANE = 'Town of Cochrane, Alberta'
+COCHRANE_GRAPH = 'cochrane_graph_all.graphml'
+COCHRANE_SHORTEST_PATH = 'cochrane_shortest_path.pickle'
+
 GRAPH_FOLDER = os.path.dirname(os.path.realpath(__file__))
+
 
 def p_center(p, city_graph, shortest_path_pickle=None):
     
-    if local:
-        # Load City of Lethbridge map from file, to save time
-        city_graph = ox.load_graphml(GRAPH_FILE, GRAPH_FOLDER)
-    else:
-        place_name = 'City of Lethbridge, Alberta'
-        city_graph = ox.graph_from_place(
-            place_name,
-            network_type='drive',
-            simplify=True,
-            clean_periphery=True,
-            truncate_by_edge=True
-        )
-        
     all_node_keys = list(city_graph._node.keys())
-    
-    # Assign the first 'p' nodes to be our solution
-    centers = all_node_keys[:p]
     
     all_pairs_shortest_path = get_all_pairs_shortest_path(
         city_graph,
@@ -41,6 +32,13 @@ def p_center(p, city_graph, shortest_path_pickle=None):
         k: max(v.values()) for k, v in 
         all_pairs_shortest_path.items()
     }
+    
+    # Get rid of 0 length paths
+    all_node_keys = [x for x in all_node_keys if all_pairs_path_maximums[x] != 0]
+    all_pairs_shortest_path = {k:v for k,v in all_pairs_shortest_path.items() if v != 0}
+    
+    # Assign the first 'p' nodes to be our solution
+    centers = all_node_keys[:p]
     
     # Compute the total cost for each center in `centers`
     center_costs = {k: all_pairs_path_maximums[k] for k in centers}
@@ -68,27 +66,13 @@ def p_center(p, city_graph, shortest_path_pickle=None):
             'lon': location.longitude,
         }
         
-    return node_information
-
-def p_median(p, local=True, shortest_path_pickle=None):
-    
-    if local:
-        # Load City of Lethbridge map from file, to save time
-        city_graph = ox.load_graphml(GRAPH_FILE, GRAPH_FOLDER)
-    else:
-        place_name = 'City of Lethbridge, Alberta'
-        city_graph = ox.graph_from_place(
-            place_name,
-            network_type='drive',
-            simplify=True,
-            clean_periphery=True,
-            truncate_by_edge=True
-        )
+    total_cost = sum(center_costs.values())
         
-    all_node_keys = list(city_graph._node.keys())
+    return total_cost, node_information
+
+def p_median(p, city_graph, shortest_path_pickle=None):
     
-    # Assign the first 'p' nodes to be our solution
-    medians = all_node_keys[:p]
+    all_node_keys = list(city_graph._node.keys())
     
     all_pairs_shortest_path = get_all_pairs_shortest_path(
         city_graph,
@@ -101,6 +85,13 @@ def p_median(p, local=True, shortest_path_pickle=None):
         k: sum(v.values()) for k, v in 
         all_pairs_shortest_path.items()
     }
+    
+    # Get rid of 0 length paths
+    all_node_keys = [x for x in all_node_keys if all_pairs_path_sums[x] != 0]
+    all_pairs_shortest_path = {k:v for k,v in all_pairs_shortest_path.items() if v != 0}
+    
+    # Assign the first 'p' nodes to be our solution
+    medians = all_node_keys[:p]
     
     # Compute the total cost for each median in `medians`
     median_costs = {k: all_pairs_path_sums[k] for k in medians}
@@ -128,7 +119,9 @@ def p_median(p, local=True, shortest_path_pickle=None):
             'lon': location.longitude,
         }
         
-    return node_information
+    total_cost = sum(median_costs.values())
+        
+    return total_cost, node_information
         
 
 def find_p_medians(medians, all_node_keys, all_pairs_path_sums, median_costs) -> tuple:
@@ -156,7 +149,8 @@ def find_p_medians(medians, all_node_keys, all_pairs_path_sums, median_costs) ->
                     # Replace `center` in center_costs with `potential_median`
                     center_costs_without_i = {k:v for k,v in median_costs.items() if k != median}
                     center_costs_without_i[potential_median] = potential_median_cost
-                    if sum(center_costs_without_i.values()) < sum(median_costs.values()):
+                    if (sum(center_costs_without_i.values()) < sum(median_costs.values()) and
+                        sum(center_costs_without_i.values()) != 0):
                         # If we're better off with `potential_median`, then use it instead
                         median_costs.pop(median, None)
                         median_costs[potential_median] = all_pairs_path_sums[potential_median]
@@ -278,23 +272,45 @@ def format_output(node, location):
 if __name__ == '__main__':
     
     city = 'City of Calgary, Alberta'
-    city = 'City of Lethbridge, Alberta'
-    city = 'City of Edmonton, Alberta'
+    #city = 'City of Lethbridge, Alberta'
+    #city = 'City of Edmonton, Alberta'
     
-    LOCAL = True
+    cities = {
+        'cochrane': {
+            'graph_file': COCHRANE_GRAPH,
+            'shortest_path': COCHRANE_SHORTEST_PATH
+        },
+        'lethbridge': {
+            'graph_file': LETHBRIDGE_GRAPH,
+            'shortest_path': LETHBRIDGE_SHORTEST_PATH
+        }
+    }
     
-    if LOCAL:
-        # Load City of Lethbridge map from file, to save time
-        city_graph = ox.load_graphml(GRAPH_FILE, GRAPH_FOLDER)
-    else:
-        place_name = 'City of Lethbridge, Alberta'
-        city_graph = ox.graph_from_place(
-            place_name,
-            network_type='drive',
-            simplify=True,
-            clean_periphery=True,
-            truncate_by_edge=True
-        )
+    city_to_use = 'lethbridge'
+    #city_to_use = 'cochrane'
+    
+    city_info = cities[city_to_use]
+    
+    # Load City of Lethbridge map from file, to save time
+    city_graph = ox.load_graphml(city_info['graph_file'], GRAPH_FOLDER)
+    shortest_path_file = city_info['shortest_path']
+    
+    """
+    city_graph = ox.graph_from_place(
+        'Town of Cochrane, Alberta',
+        network_type='drive',
+        simplify=True,
+        clean_periphery=True,
+        truncate_by_edge=True
+    )
+    """
+    
+    p = 2
 
-    #p_median(2, local=False, shortest_path_pickle='./lethbridge_shortest_paths.pickle')    
-    p_center(2, local=False, shortest_path_pickle='./lethbridge_shortest_paths.pickle')
+    median_result_costs, median_result_nodes = \
+        p_median(p, city_graph, shortest_path_pickle=shortest_path_file)    
+    
+    center_result_costs, center_result_nodes = \
+        p_center(p, city_graph, shortest_path_pickle=shortest_path_file)            
+    
+    i = 5
