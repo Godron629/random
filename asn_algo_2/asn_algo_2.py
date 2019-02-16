@@ -292,8 +292,8 @@ if __name__ == '__main__':
         }
     }
     
-    city_to_use = 'lethbridge'
-    #city_to_use = 'cochrane'
+    #city_to_use = 'lethbridge'
+    city_to_use = 'cochrane'
     
     city_info = cities[city_to_use]
     
@@ -311,7 +311,7 @@ if __name__ == '__main__':
     )
     """
     
-    p = 2
+    p = 1
 
     before = datetime.utcnow()
     median_result_costs, median_result_nodes = \
@@ -321,4 +321,6 @@ if __name__ == '__main__':
     before = datetime.utcnow()
     center_result_costs, center_result_nodes = \
         p_center(p, city_graph, shortest_path_pickle=shortest_path_file)            
-    print('center time: {}'.format(datetime.utcnow() - before))
+    print('center time: {}'.format(datetime.utcnow() - before))    
+    
+    i = 5
