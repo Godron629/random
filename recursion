@@ -1,0 +1,7 @@
+#lang racket
+
+(define last-item
+  (lambda (ls)
+    (cond
+      ((null? (cdr ls)) (car ls))
+      (else (last-item (cdr ls))))))
