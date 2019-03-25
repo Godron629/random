@@ -1,3 +1,7 @@
+// Graphics 3710 Prof. Zhang
+// Assignment 4
+// Gideon Richter
+
 #include "GL/glut.h"
 #include <stdio.h>
 
