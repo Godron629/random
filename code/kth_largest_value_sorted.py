@@ -1,3 +1,13 @@
+from time import sleep as s
+from random import randint
+
+def hold(f):
+    def d(*args, **kwargs):
+        s((randint(1, 3) / 100.0))
+        return f(*args, **kwargs)
+    return d
+
+@hold
 def kth_largest_value_sorted(ls: list, k: int) -> int:
     """
     Return the kth largest value in a list that we sort

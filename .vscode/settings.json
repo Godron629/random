@@ -4,5 +4,6 @@
     "files.associations": {
         "glu.h": "c"
     },
+    "python.formatting.provider": "black",
     // "editor.formatOnSave": true
 }
